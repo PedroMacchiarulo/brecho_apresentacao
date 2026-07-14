@@ -1,0 +1,261 @@
+const SUPABASE_URL = 'SUA_URL_DO_SUPABASE';
+const SUPABASE_KEY = 'SUA_CHAVE_ANON_DO_SUPABASE';
+
+// Inicializa o cliente Supabase - Corrigido para evitar conflito de nomes
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// --- GESTÃO DE ACESSO (SIMPLIFICADA) ---
+function checkAuth() {
+    const user = localStorage.getItem('brecho_auth_user');
+    if (!user && window.location.pathname.includes('admin.html')) {
+        window.location.href = 'login.html';
+    }
+}
+
+function handleLogin() {
+    const form = document.getElementById('login-form');
+    if (!form) return;
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const user = document.getElementById('username').value;
+        const pass = document.getElementById('password').value;
+
+        if (user === 'admin' && pass === 'admin') {
+            localStorage.setItem('brecho_auth_user', 'admin');
+            alert('Bem-vindo, Gestor!');
+            window.location.href = 'admin.html';
+        } else {
+            alert('Usuário ou senha incorretos!');
+        }
+    });
+}
+
+function logout() {
+    localStorage.removeItem('brecho_auth_user');
+    window.location.href = 'index.html';
+}
+
+// --- BANCO DE DADOS (SUPABASE) ---
+async function getProducts() {
+    const { data, error } = await supabaseClient
+        .from('products')
+        .select('*')
+        .order('id', { ascending: true });
+    
+    if (error) {
+        console.error('Erro ao buscar produtos:', error);
+        return [];
+    }
+    return data;
+}
+
+// --- LÓGICA DA VITRINE (USER) ---
+async function renderUserVitrine() {
+    const listContainer = document.getElementById('product-list');
+    if (!listContainer) return;
+
+    const products = await getProducts();
+    listContainer.innerHTML = '';
+
+    products.forEach(prod => {
+        const isVendido = prod.status === 'Vendido';
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+            <img src="${prod.image || 'https://via.placeholder.com/300'}" alt="${prod.title}" class="card-img" onclick="openProductDetails(${prod.id})" style="cursor: pointer;">
+            <div class="card-content">
+                <div class="card-meta">
+                    <span class="badge" style="background: ${prod.origin === 'Outlet' ? '#FFB300' : '#2E7D32'}">${prod.origin}</span>
+                    <span class="badge" style="background: #888">${prod.size}</span>
+                </div>
+                <div class="card-title">${prod.title}</div>
+                <div class="card-price">R$ ${prod.price.toFixed(2)}</div>
+                <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">${prod.description}</p>
+                <div style="font-size: 0.75rem; color: #999; margin-bottom: 10px;">🚚 ${prod.logistics}</div>
+                <button class="btn btn-primary" ${isVendido ? 'disabled style="background: #ccc; cursor: not-allowed"' : ''} 
+                    onclick="sendWhatsApp('${prod.title}')">
+                    ${isVendido ? 'Vendido' : 'Tenho Interesse'}
+                </button>
+            </div>
+        `;
+        listContainer.appendChild(card);
+    });
+}
+
+function openProductDetails(id) {
+    supabaseClient.from('products').select('*').eq('id', id).single().then(({ data }) => {
+        const prod = data;
+        if (!prod) return;
+
+        document.getElementById('modal-img').src = prod.image || 'https://via.placeholder.com/300';
+        document.getElementById('modal-title').innerText = prod.title;
+        document.getElementById('modal-origin').innerText = prod.origin;
+        document.getElementById('modal-origin').style.background = prod.origin === 'Outlet' ? '#FFB300' : '#2E7D32';
+        document.getElementById('modal-size').innerText = prod.size;
+        document.getElementById('modal-price').innerText = `R$ ${prod.price.toFixed(2)}`;
+        document.getElementById('modal-description').innerText = prod.description;
+        document.getElementById('modal-logistics').innerText = `🚚 ${prod.logistics}`;
+        
+        const whatsappBtn = document.getElementById('modal-whatsapp-btn');
+        whatsappBtn.disabled = prod.status === 'Vendido';
+        whatsappBtn.style.background = prod.status === 'Vendido' ? '#ccc' : '';
+        whatsappBtn.innerText = prod.status === 'Vendido' ? 'Vendido' : 'Tenho Interesse';
+        whatsappBtn.onclick = () => sendWhatsApp(prod.title);
+
+        document.getElementById('product-modal').style.display = 'flex';
+    });
+}
+
+function closeProductDetails() {
+    document.getElementById('product-modal').style.display = 'none';
+}
+
+function sendWhatsApp(title) {
+    const phone = "5511999999999";
+    const msg = encodeURIComponent(`Olá! Gostaria de saber mais sobre a peça "${title}" que vi no site do Esqueci no Cabide!`);
+    window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+}
+
+// --- LÓGICA DO GESTOR (ADMIN) ---
+async function renderAdminTable() {
+    const tableBody = document.getElementById('admin-product-list');
+    if (!tableBody) return;
+
+    const products = await getProducts();
+    tableBody.innerHTML = '';
+
+    products.forEach(prod => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><strong>${prod.title}</strong></td>
+            <td>${prod.origin}</td>
+            <td>${prod.size}</td>
+            <td>R$ ${prod.price.toFixed(2)}</td>
+            <td><span class="status-badge ${prod.status === 'Disponível' ? 'status-disponivel' : 'status-vendido'}">${prod.status}</span></td>
+            <td>
+                <button class="btn btn-primary" style="padding: 5px 10px; font-size: 0.7rem;" 
+                    onclick="toggleStatus(${prod.id})">
+                    ${prod.status === 'Disponível' ? 'Marcar Vendido' : 'Tornar Disponível'}
+                </button>
+                <button class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.7rem; background: #ff4d4d; color: white; margin-left: 5px;" 
+                    onclick="deleteProduct(${prod.id})">Excluir</button>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+async function toggleStatus(id) {
+    const { data: prod } = await supabaseClient.from('products').select('*').eq('id', id).single();
+    if (prod) {
+        const newStatus = prod.status === 'Disponível' ? 'Vendido' : 'Disponível';
+        const { error } = await supabaseClient
+            .from('products')
+            .update({ status: newStatus, lastModified: new Date().toISOString() })
+            .eq('id', id);
+
+        if (error) alert('Erro ao atualizar status');
+        renderAdminTable();
+    }
+}
+
+async function deleteProduct(id) {
+    if (confirm('Deseja realmente excluir este produto?')) {
+        const { error } = await supabaseClient.from('products').delete().eq('id', id);
+        if (error) alert('Erro ao excluir produto');
+        renderAdminTable();
+    }
+}
+
+function handleAdminForm() {
+    const form = document.getElementById('product-form');
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const newProduct = {
+            title: document.getElementById('title').value,
+            price: parseFloat(document.getElementById('price').value),
+            origin: document.getElementById('origin').value,
+            category: document.getElementById('category').value,
+            size: document.getElementById('size').value,
+            description: document.getElementById('description').value,
+            logistics: document.getElementById('logistics').value,
+            image: document.getElementById('image').value,
+            status: 'Disponível',
+            lastModified: new Date().toISOString()
+        };
+
+        const { error } = await supabaseClient.from('products').insert([newProduct]);
+        if (error) {
+            alert('Erro ao cadastrar produto: ' + error.message);
+        } else {
+            alert('Produto cadastrado com sucesso!');
+            form.reset();
+            renderAdminTable();
+        }
+    });
+}
+
+async function generateReport() {
+    const filter = document.getElementById('report-filter').value;
+    const now = Date.now();
+    let cutoff;
+    if (filter === 'day') {
+        cutoff = new Date(now - 24 * 60 * 60 * 1000).toISOString();
+    } else if (filter === 'week') {
+        cutoff = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString();
+    } else if (filter === 'month') {
+        cutoff = new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString();
+    } else {
+        cutoff = '1970-01-01T00:00:00Z';
+    }
+
+    const { data: filtered, error } = await supabaseClient
+        .from('products')
+        .select('*')
+        .eq('status', 'Vendido')
+        .gte('lastModified', cutoff);
+
+    if (error) {
+        console.error('Erro ao gerar relatório:', error);
+        return;
+    }
+
+    const container = document.getElementById('report-results');
+    if (!container) return;
+    if (!filtered || filtered.length === 0) {
+        container.innerHTML = '<p>Nenhuma movimentação encontrada para o período selecionado.</p>';
+        return;
+    }
+    let html = '<table class="report-table"><thead><tr><th>Peça</th><th>Data da Venda</th></tr></thead><tbody>';
+    filtered.forEach(p => {
+        const date = new Date(p.lastModified);
+        const formatted = date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR');
+        html += `<tr><td>${p.title}</td><td>${formatted}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+}
+
+function openTab(evt, tabName) {
+    const tabcontents = document.getElementsByClassName("tab-content");
+    for (let i = 0; i < tabcontents.length; i++) {
+        tabcontents[i].classList.remove("active");
+    }
+    const tabbtns = document.getElementsByClassName("tab-btn");
+    for (let i = 0; i < tabbtns.length; i++) {
+        tabbtns[i].classList.remove("active");
+    }
+    document.getElementById(tabName).classList.add("active");
+    evt.currentTarget.classList.add("active");
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    checkAuth();
+    renderUserVitrine();
+    renderAdminTable();
+    handleAdminForm();
+    handleLogin();
+});
