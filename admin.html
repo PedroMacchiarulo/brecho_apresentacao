@@ -120,14 +120,26 @@
         <!-- ABA: RELATÓRIO -->
         <div id="tab-relatorio" class="tab-content">
             <div class="form-container">
-                <h3 style="margin-bottom: 20px; color: var(--secondary-color);">Relatório de Movimentação</h3>
+                <h3 style="margin-bottom: 20px; color: var(--secondary-color);">Relatório de Atividades</h3>
                 <form id="report-form">
                     <div class="form-group">
-                        <label for="report-filter">Filtrar por</label>
-                        <select id="report-filter" required>
-                            <option value="day">Dia</option>
-                            <option value="week">Semana</option>
-                            <option value="month">Mês</option>
+                        <label for="report-action">Tipo de Ação</label>
+                        <select id="report-action">
+                            <option value="all">Todas</option>
+                            <option value="cadastro">Cadastro</option>
+                            <option value="venda">Venda</option>
+                            <option value="restauracao">Restauração</option>
+                            <option value="edicao">Edição</option>
+                            <option value="exclusao">Exclusão</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="report-period">Período</label>
+                        <select id="report-period" required>
+                            <option value="day">Últimas 24h</option>
+                            <option value="week">Última Semana</option>
+                            <option value="month">Último Mês</option>
+                            <option value="all">Todo Período</option>
                         </select>
                     </div>
                     <button type="button" class="btn btn-primary" onclick="generateReport()">Gerar Relatório</button>

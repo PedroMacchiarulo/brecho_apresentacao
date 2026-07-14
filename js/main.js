@@ -29,14 +29,29 @@ function handleLogin() {
 
 function checkAuth() {
   const user = localStorage.getItem("brecho_auth_user");
-  if (!user && window.location.pathname.includes("admin.html")) {
+  const path = window.location.pathname;
+  if (!user && (path.includes("admin") || path.includes("gestao"))) {
     window.location.href = "login.html";
+  }
+  if (user) {
+    document.body.classList.add("logged-in");
+    const indicator = document.getElementById("auth-indicator");
+    if (indicator) indicator.style.display = "inline";
+    const loginLink = document.getElementById("login-link");
+    if (loginLink) loginLink.style.display = "none";
   }
 }
 
 function logout() {
+  if (!confirm("Tem certeza que deseja sair?")) return;
   localStorage.removeItem("brecho_auth_user");
   window.location.href = "index.html";
+}
+
+function requireAuth() {
+  if (!localStorage.getItem("brecho_auth_user")) {
+    window.location.href = "login.html";
+  }
 }
 
 // --- INICIALIZAÇÃO DO BANCO DE DADOS ---
@@ -97,6 +112,20 @@ async function getProducts() {
   } catch (error) {
     console.error("Erro ao buscar produtos:", error);
     return [];
+  }
+}
+
+// --- FUNÇÃO DE LOG DE ATIVIDADES ---
+async function logActivity(actionType, productTitle, description) {
+  if (!supabaseClient) return;
+  try {
+    await supabaseClient.from("activity_log").insert([{
+      action_type: actionType,
+      product_title: productTitle,
+      description: description,
+    }]);
+  } catch (e) {
+    console.error("Erro ao registrar atividade:", e);
   }
 }
 
@@ -257,6 +286,7 @@ async function toggleStatus(id) {
       updateData.status = qtd === 0 ? "Vendido" : "Disponível";
       const { error } = await supabaseClient.from("products").update(updateData).eq("id", id);
       if (error) { alert("Erro ao registrar venda."); return; }
+      logActivity("venda", prod.title, qtd > 0 ? `Vendida 1 peça. Restam ${qtd}` : "Última peça vendida");
       if (qtd > 0) {
         alert(`Venda registrada! Restam ${qtd} peça(s) em estoque.`);
       } else {
@@ -267,6 +297,7 @@ async function toggleStatus(id) {
       updateData.status = "Disponível";
       const { error } = await supabaseClient.from("products").update(updateData).eq("id", id);
       if (error) { alert("Erro ao restaurar produto."); return; }
+      logActivity("restauracao", prod.title, "Produto restaurado ao estoque com 1 peça");
       alert("Produto disponível novamente com 1 peça.");
     }
     renderAdminTable();
@@ -279,11 +310,18 @@ async function deleteProduct(id) {
     return;
   }
   if (confirm("Deseja realmente excluir este produto?")) {
+    const { data: prod } = await supabaseClient
+      .from("products")
+      .select("title")
+      .eq("id", id)
+      .single();
+    const title = prod?.title || "Desconhecido";
     const { error } = await supabaseClient
       .from("products")
       .delete()
       .eq("id", id);
     if (error) alert("Erro ao excluir produto");
+    else logActivity("exclusao", title, "Produto removido do catálogo");
     renderAdminTable();
   }
 }
@@ -329,6 +367,7 @@ function handleAdminForm() {
     if (error) {
       alert("Erro ao cadastrar produto: " + error.message);
     } else {
+      logActivity("cadastro", newProduct.title, "Novo produto cadastrado no estoque");
       alert("Produto cadastrado com sucesso!");
       form.reset();
       renderAdminTable();
@@ -341,44 +380,75 @@ async function generateReport() {
     alert("Banco de dados não conectado.");
     return;
   }
-  const filter = document.getElementById("report-filter").value;
+
+  const actionFilter = document.getElementById("report-action").value;
+  const periodFilter = document.getElementById("report-period").value;
+
   const now = Date.now();
   let cutoff;
-  if (filter === "day") {
+  if (periodFilter === "day") {
     cutoff = new Date(now - 24 * 60 * 60 * 1000).toISOString();
-  } else if (filter === "week") {
+  } else if (periodFilter === "week") {
     cutoff = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString();
-  } else if (filter === "month") {
+  } else if (periodFilter === "month") {
     cutoff = new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString();
   } else {
     cutoff = "1970-01-01T00:00:00Z";
   }
 
-  const { data: filtered, error } = await supabaseClient
-    .from("products")
+  let query = supabaseClient
+    .from("activity_log")
     .select("*")
-    .eq("status", "Vendido")
-    .gte("lastModified", cutoff);
+    .gte("created_at", cutoff)
+    .order("created_at", { ascending: false });
+
+  if (actionFilter !== "all") {
+    query = query.eq("action_type", actionFilter);
+  }
+
+  const { data: logs, error } = await query;
 
   if (error) {
     console.error("Erro ao gerar relatório:", error);
+    alert("Erro ao carregar relatório.");
     return;
   }
 
   const container = document.getElementById("report-results");
   if (!container) return;
-  if (!filtered || filtered.length === 0) {
+  if (!logs || logs.length === 0) {
     container.innerHTML =
-      "<p>Nenhuma movimentação encontrada para o período selecionado.</p>";
+      "<p>Nenhuma atividade encontrada para o período selecionado.</p>";
     return;
   }
-  let html =
-    '<table class="report-table"><thead><tr><th>Peça</th><th>Data da Venda</th></tr></thead><tbody>';
-  filtered.forEach((p) => {
-    const date = new Date(p.lastModified);
+
+  const labels = {
+    cadastro: "Cadastro",
+    venda: "Venda",
+    restauracao: "Restauração",
+    edicao: "Edição",
+    exclusao: "Exclusão",
+  };
+
+  const colors = {
+    cadastro: "#2E7D32",
+    venda: "#e67e22",
+    restauracao: "#2196F3",
+    edicao: "#9C27B0",
+    exclusao: "#f44336",
+  };
+
+  let html = '<table class="report-table"><thead><tr><th>Ação</th><th>Peça</th><th>Descrição</th><th>Data/Hora</th></tr></thead><tbody>';
+  logs.forEach((log) => {
+    const date = new Date(log.created_at);
     const formatted =
       date.toLocaleDateString("pt-BR") + " " + date.toLocaleTimeString("pt-BR");
-    html += `<tr><td>${p.title}</td><td>${formatted}</td></tr>`;
+    html += `<tr>
+      <td><span style="background:${colors[log.action_type] || "#888"}; color:white; padding:2px 8px; border-radius:10px; font-size:0.75rem;">${labels[log.action_type] || log.action_type}</span></td>
+      <td>${log.product_title || "-"}</td>
+      <td>${log.description || "-"}</td>
+      <td>${formatted}</td>
+    </tr>`;
   });
   html += "</tbody></table>";
   container.innerHTML = html;
@@ -452,6 +522,7 @@ async function saveEditProduct(e) {
   if (error) {
     alert("Erro ao atualizar produto: " + error.message);
   } else {
+    logActivity("edicao", updatedProduct.title, "Produto editado no catálogo");
     alert("Produto atualizado com sucesso!");
     closeEditModal();
     renderAdminTable();
