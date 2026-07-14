@@ -277,16 +277,15 @@ function handleAdminForm() {
       return;
     }
 
-    // Verifica se enviou arquivo ou URL
+    // Pega a foto do arquivo
     const fileInput = document.getElementById("image-file");
     const file = fileInput.files[0];
-    let imageUrl = document.getElementById("image").value;
-
-    if (file) {
-      const uploadedUrl = await uploadImage(file);
-      if (!uploadedUrl) return;
-      imageUrl = uploadedUrl;
+    if (!file) {
+      alert("Selecione uma foto para o produto.");
+      return;
     }
+    const imageUrl = await uploadImage(file);
+    if (!imageUrl) return;
 
     const newProduct = {
       title: document.getElementById("title").value,
@@ -395,11 +394,10 @@ async function saveEditProduct(e) {
   const id = document.getElementById("edit-id").value;
   if (!id || !supabaseClient) return;
 
-  // Verifica se enviou arquivo ou URL
+  // Verifica se enviou arquivo
   const fileInput = document.getElementById("edit-image-file");
   const file = fileInput.files[0];
-  let imageUrl = document.getElementById("edit-image").value;
-
+  let imageUrl = "";
   if (file) {
     const uploadedUrl = await uploadImage(file);
     if (!uploadedUrl) return;

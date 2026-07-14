@@ -141,6 +141,7 @@ h2::after {
     width: 100%;
     height: 250px;
     object-fit: cover;
+    aspect-ratio: 4 / 3;
 }
 
 .card-content {
@@ -344,6 +345,7 @@ footer {
     
     .card-img {
         height: 200px;
+        aspect-ratio: 4 / 3;
     }
 }
 
@@ -389,6 +391,7 @@ footer {
     max-height: 500px;
     object-fit: cover;
     border-radius: 15px;
+    aspect-ratio: 4 / 3;
 }
 
 .modal-info {
