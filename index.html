@@ -6,6 +6,7 @@
     <title>Vitrine - Brechó Esqueci no Cabide</title>
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -25,10 +26,34 @@
         </div>
     </main>
 
+    <!-- MODAL DE DETALHES DO PRODUTO -->
+    <div id="product-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeProductDetails()">&times;</span>
+            <div class="modal-body">
+                <div class="modal-image-container">
+                    <img id="modal-img" src="" alt="Detalhe do Produto">
+                </div>
+                <div class="modal-info">
+                    <h3 id="modal-title"></h3>
+                    <div class="modal-meta">
+                        <span id="modal-origin" class="badge"></span>
+                        <span id="modal-size" class="badge"></span>
+                    </div>
+                    <p id="modal-price" class="card-price" style="font-size: 1.5rem; margin: 15px 0;"></p>
+                    <p id="modal-description" style="color: #555; line-height: 1.6; margin-bottom: 20px;"></p>
+                    <p id="modal-logistics" style="font-size: 0.9rem; color: #777; margin-bottom: 25px;"></p>
+                    <button id="modal-whatsapp-btn" class="btn btn-primary" style="width: 100%; padding: 15px;">Tenho Interesse</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <footer>
         <p>&copy; 2026 Brechó Esqueci no Cabide - Moda Circular & Sustentável</p>
     </footer>
-
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/main.js"></script>
 </body>
 </html>
+
