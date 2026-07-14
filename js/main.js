@@ -116,7 +116,8 @@ async function renderUserVitrine() {
     }
 
     products.forEach((prod) => {
-      const isVendido = prod.status === "Vendido";
+      const qtd = prod.quantity != null ? prod.quantity : (prod.status === "Vendido" ? 0 : 1);
+      const isVendido = qtd === 0;
       const card = document.createElement("div");
       card.className = "card";
       card.innerHTML = `
@@ -125,6 +126,7 @@ async function renderUserVitrine() {
                     <div class="card-meta">
                         <span class="badge" style="background: ${prod.origin === "Outlet" ? "#FFB300" : "#2E7D32"}">${prod.origin}</span>
                         <span class="badge" style="background: #888">${prod.size}</span>
+                        ${qtd > 1 ? `<span class="badge" style="background: #e67e22">${qtd} em estoque</span>` : ""}
                     </div>
                     <div class="card-title">${prod.title}</div>
                     <div class="card-price">R$ ${prod.price.toFixed(2)}</div>
@@ -162,14 +164,18 @@ function openProductDetails(id) {
       document.getElementById("modal-size").innerText = prod.size;
       document.getElementById("modal-price").innerText =
         `R$ ${prod.price.toFixed(2)}`;
+      const qtd = prod.quantity != null ? prod.quantity : (prod.status === "Vendido" ? 0 : 1);
+      const qtdEl = document.getElementById("modal-quantity");
+      if (qtdEl) qtdEl.innerText = qtd > 0 ? `${qtd} unidade(s)` : "Esgotado";
       document.getElementById("modal-description").innerText = prod.description;
       document.getElementById("modal-logistics").innerText =
         `🚚 ${prod.logistics}`;
+      const isVendido = qtd === 0;
       const whatsappBtn = document.getElementById("modal-whatsapp-btn");
-      whatsappBtn.disabled = prod.status === "Vendido";
-      whatsappBtn.style.background = prod.status === "Vendido" ? "#ccc" : "";
+      whatsappBtn.disabled = isVendido;
+      whatsappBtn.style.background = isVendido ? "#ccc" : "";
       whatsappBtn.innerText =
-        prod.status === "Vendido" ? "Vendido" : "Tenho Interesse";
+        isVendido ? "Vendido" : "Tenho Interesse";
       whatsappBtn.onclick = () => sendWhatsApp(prod.title);
       document.getElementById("product-modal").style.display = "flex";
     })
@@ -199,22 +205,24 @@ async function renderAdminTable() {
 
     if (!products || products.length === 0) {
       tableBody.innerHTML =
-        '<tr><td colspan="6" style="text-align:center;">Nenhum produto cadastrado.</td></tr>';
+        '<tr><td colspan="7" style="text-align:center;">Nenhum produto cadastrado.</td></tr>';
       return;
     }
 
     products.forEach((prod) => {
+      const qtd = prod.quantity != null ? prod.quantity : (prod.status === "Vendido" ? 0 : 1);
       const row = document.createElement("tr");
       row.innerHTML = `
                 <td><strong>${prod.title}</strong></td>
                 <td>${prod.origin}</td>
                 <td>${prod.size}</td>
                 <td>R$ ${prod.price.toFixed(2)}</td>
-                <td><span class="status-badge ${prod.status === "Disponível" ? "status-disponivel" : "status-vendido"}">${prod.status}</span></td>
+                <td>${qtd}</td>
+                <td><span class="status-badge ${qtd === 0 ? "status-vendido" : "status-disponivel"}">${qtd === 0 ? "Vendido" : "Disponível"}</span></td>
                 <td>
                     <button class="btn btn-primary" style="padding: 5px 10px; font-size: 0.7rem;" 
                         onclick="toggleStatus(${prod.id})">
-                        ${prod.status === "Disponível" ? "Marcar Vendido" : "Tornar Disponível"}
+                        ${qtd > 0 ? "Vender Peça" : "Tornar Disponível"}
                     </button>
                     <button class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.7rem; background: #4CAF50; color: white; margin-left: 5px;" 
                         onclick="openEditModal(${prod.id})">Editar</button>
@@ -240,13 +248,27 @@ async function toggleStatus(id) {
     .eq("id", id)
     .single();
   if (prod) {
-    const newStatus = prod.status === "Disponível" ? "Vendido" : "Disponível";
-    const { error } = await supabaseClient
-      .from("products")
-      .update({ status: newStatus, lastModified: new Date().toISOString() })
-      .eq("id", id);
+    let qtd = prod.quantity != null ? prod.quantity : (prod.status === "Vendido" ? 0 : 1);
+    let updateData = { lastModified: new Date().toISOString() };
 
-    if (error) alert("Erro ao atualizar status");
+    if (qtd > 0) {
+      qtd--;
+      updateData.quantity = qtd;
+      updateData.status = qtd === 0 ? "Vendido" : "Disponível";
+      const { error } = await supabaseClient.from("products").update(updateData).eq("id", id);
+      if (error) { alert("Erro ao registrar venda."); return; }
+      if (qtd > 0) {
+        alert(`Venda registrada! Restam ${qtd} peça(s) em estoque.`);
+      } else {
+        alert("Última peça vendida! Produto esgotado.");
+      }
+    } else {
+      updateData.quantity = 1;
+      updateData.status = "Disponível";
+      const { error } = await supabaseClient.from("products").update(updateData).eq("id", id);
+      if (error) { alert("Erro ao restaurar produto."); return; }
+      alert("Produto disponível novamente com 1 peça.");
+    }
     renderAdminTable();
   }
 }
@@ -290,6 +312,7 @@ function handleAdminForm() {
     const newProduct = {
       title: document.getElementById("title").value,
       price: parseFloat(document.getElementById("price").value),
+      quantity: parseInt(document.getElementById("quantity").value) || 1,
       origin: document.getElementById("origin").value,
       category: document.getElementById("category").value,
       size: document.getElementById("size").value,
@@ -374,12 +397,12 @@ function openEditModal(id) {
       document.getElementById("edit-id").value = prod.id;
       document.getElementById("edit-title").value = prod.title;
       document.getElementById("edit-price").value = prod.price;
+      document.getElementById("edit-quantity").value = prod.quantity ?? 1;
       document.getElementById("edit-origin").value = prod.origin;
       document.getElementById("edit-category").value = prod.category;
       document.getElementById("edit-size").value = prod.size;
       document.getElementById("edit-description").value = prod.description;
       document.getElementById("edit-logistics").value = prod.logistics;
-      document.getElementById("edit-image").value = prod.image || "";
       document.getElementById("edit-modal").style.display = "flex";
     })
     .catch((err) => console.error("Erro ao abrir modal de edição:", err));
@@ -404,17 +427,22 @@ async function saveEditProduct(e) {
     imageUrl = uploadedUrl;
   }
 
+  const qtd = parseInt(document.getElementById("edit-quantity").value) || 0;
+
   const updatedProduct = {
     title: document.getElementById("edit-title").value,
     price: parseFloat(document.getElementById("edit-price").value),
+    quantity: qtd,
     origin: document.getElementById("edit-origin").value,
     category: document.getElementById("edit-category").value,
     size: document.getElementById("edit-size").value,
     description: document.getElementById("edit-description").value,
     logistics: document.getElementById("edit-logistics").value,
-    image: imageUrl,
+    status: qtd > 0 ? "Disponível" : "Vendido",
     lastModified: new Date().toISOString(),
   };
+
+  if (imageUrl) updatedProduct.image = imageUrl;
 
   const { error } = await supabaseClient
     .from("products")

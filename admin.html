@@ -39,6 +39,7 @@
                             <th>Tipo</th>
                             <th>Tam.</th>
                             <th>Preço</th>
+                            <th>Qtd</th>
                             <th>Status</th>
                             <th>Ações</th>
                         </tr>
@@ -62,6 +63,10 @@
                     <div class="form-group">
                         <label for="price">Preço (R$)</label>
                         <input type="number" id="price" step="0.01" placeholder="0.00" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="quantity">Quantidade em Estoque</label>
+                        <input type="number" id="quantity" min="1" value="1" required>
                     </div>
                     <div class="form-group">
                         <label for="origin">Tipo de Peça</label>
@@ -147,6 +152,10 @@
                     <div class="form-group">
                         <label for="edit-price">Preço (R$)</label>
                         <input type="number" id="edit-price" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-quantity">Quantidade em Estoque</label>
+                        <input type="number" id="edit-quantity" min="0" required>
                     </div>
                     <div class="form-group">
                         <label for="edit-origin">Tipo de Peça</label>
