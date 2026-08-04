@@ -3,7 +3,7 @@
     --primary-variant: #ffe4b5; /* moccasin */
     --secondary-color: #a8dadc; /* pastel teal */
     --accent-color: #ff6f61; /* coral accent */
-    --background-color: #fff8e1; /* very light yellow */
+    --background-color: #f5ecd9; /* slightly toned down background */
     --surface-color: #ffffff; /* clean white */
     --error-color: #b00020;
     --on-primary: #5d4037; /* brown text for contrast */
@@ -16,7 +16,7 @@
 }
 
 /* Global reset */
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; caret-color: transparent; }
 
 body {
     font-family: 'Roboto', sans-serif;
@@ -166,7 +166,7 @@ h2::after {
     content: "";
     position: absolute;
     inset: 0;
-    background: rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.1);
     z-index: 0;
 }
 .hero .hero-content {
