@@ -11,7 +11,18 @@
 <body>
 
     <header>
-        <h1 class="logo"><img src="assets/logo_brecho.png" alt="Logo Brechó Esqueci no Cabide" style="max-height:80px;"></h1>
+    <div class="menu-wrapper">
+        <button class="menu-toggle" aria-label="Menu" title="Menu">
+            &#8942; <!-- Unicode vertical ellipsis (⋮) -->
+        </button>
+        <ul class="menu-list hidden">
+            <li><a href="index.html">Início</a></li>
+            <li><a href="sobre.html">Sobre</a></li>
+            <li><a href="admin.html" id="auth-indicator" style="display:none;">📋 Gestão</a></li>
+            <li><a href="login.html" id="login-link">Acessar Gestão</a></li>
+        </ul>
+    </div>
+    <h1 class="logo"><img src="assets/logo_brecho.png" alt="Logo Brechó Esqueci no Cabide" style="max-height:80px;"></h1>
         <nav>
             <a href="index.html">Início</a>
             <a href="sobre.html">Sobre</a>
