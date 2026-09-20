@@ -38,7 +38,11 @@ function checkAuth() {
     const indicator = document.getElementById("auth-indicator");
     if (indicator) indicator.style.display = "inline";
     const loginLink = document.getElementById("login-link");
-    if (loginLink) loginLink.style.display = "none";
+    // Only hide login link if we are NOT on the home page (index.html)
+    // or we can replace it with a "Logout" link.
+    if (loginLink && !path.includes("index.html")) {
+       loginLink.style.display = "none";
+    }
   }
 }
 
