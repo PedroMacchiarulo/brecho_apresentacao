@@ -30,18 +30,30 @@ function handleLogin() {
 function checkAuth() {
   const user = localStorage.getItem("brecho_auth_user");
   const path = window.location.pathname;
+  
+  // Redireciona para login se tentar acessar admin sem estar logado
   if (!user && (path.includes("admin") || path.includes("gestao"))) {
     window.location.href = "login.html";
+    return;
   }
+
   if (user) {
     document.body.classList.add("logged-in");
     const indicator = document.getElementById("auth-indicator");
     if (indicator) indicator.style.display = "inline";
+    
     const loginLink = document.getElementById("login-link");
-    // Only hide login link if we are NOT on the home page (index.html)
-    // or we can replace it with a "Logout" link.
-    if (loginLink && !path.includes("index.html")) {
-       loginLink.style.display = "none";
+    if (loginLink) {
+      // Se estiver logado, transforma o botão "Login" em "Painel Admin" na home
+      if (path === "/" || path.includes("index.html")) {
+        loginLink.textContent = "Painel Admin";
+        loginLink.href = "admin.html";
+        loginLink.style.display = "block";
+      } else {
+        // Em outras páginas, pode esconder ou manter conforme a necessidade
+        // Aqui vamos manter visível para facilitar a navegação
+        loginLink.style.display = "block";
+      }
     }
   }
 }
