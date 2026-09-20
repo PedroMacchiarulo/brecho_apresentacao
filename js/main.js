@@ -343,16 +343,40 @@ async function toggleStatus(id) {
     let updateData = { lastModified: new Date().toISOString() };
 
     if (qtd > 0) {
-      qtd--;
+      // --- LÓGICA DE CONFIRMAÇÃO DE VENDA ---
+      let finalQtdSold = 1;
+      if (qtd > 1) {
+        const inputQtd = prompt(`A peça "${prod.title}" possui ${qtd} unidade(s). Quantas deseja vender?`, "1");
+        const parsedQtd = parseInt(inputQtd);
+        
+        if (isNaN(parsedQtd) || parsedQtd <= 0) {
+          alert("Quantidade inválida.");
+          return;
+        }
+        if (parsedQtd > qtd) {
+          alert(`Você só possui ${qtd} unidade(s) em estoque.`);
+          return;
+        }
+        finalQtdSold = parsedQtd;
+      } else {
+        // Se tiver apenas uma, pede confirmação simples
+        if (!confirm(`Deseja confirmar a venda da última unidade de "${prod.title}"?`)) {
+          return;
+        }
+      }
+
+      qtd -= finalQtdSold;
       updateData.quantity = qtd;
       updateData.status = qtd === 0 ? "Vendido" : "Disponível";
       const { error } = await supabaseClient.from("products").update(updateData).eq("id", id);
       if (error) { alert("Erro ao registrar venda."); return; }
-      logActivity("venda", prod.title, qtd > 0 ? `Vendida 1 peça. Restam ${qtd}` : "Última peça vendida");
+      
+      logActivity("venda", prod.title, `Vendidas ${finalQtdSold} peça(s). Restam ${qtd}`);
+      
       if (qtd > 0) {
-        alert(`Venda registrada! Restam ${qtd} peça(s) em estoque.`);
+        alert(`Venda de ${finalQtdSold} peça(s) registrada! Restam ${qtd} no estoque.`);
       } else {
-        alert("Última peça vendida! Produto esgotado.");
+        alert(`Venda de ${finalQtdSold} peça(s) registrada! Produto esgotado.`);
       }
     } else {
       updateData.quantity = 1;
