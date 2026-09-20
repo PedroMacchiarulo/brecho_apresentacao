@@ -524,10 +524,10 @@ function handleAdminForm() {
       .from("products")
       .insert([newProduct]);
     if (error) {
-      alert("Erro ao cadastrar produto: " + error.message);
+      showCustomAlert("Erro", "Erro ao cadastrar produto: " + error.message);
     } else {
       logActivity("cadastro", newProduct.title, "Novo produto cadastrado no estoque");
-      alert("Produto cadastrado com sucesso!");
+      showCustomAlert("Sucesso", "Produto cadastrado com sucesso!");
       form.reset();
       renderAdminTable();
     }
@@ -569,7 +569,7 @@ async function generateReport() {
 
   if (error) {
     console.error("Erro ao gerar relatório:", error);
-    alert("Erro ao carregar relatório.");
+    showCustomAlert("Erro", "Erro ao carregar relatório.");
     return;
   }
 
@@ -679,10 +679,10 @@ async function saveEditProduct(e) {
     .eq("id", id);
 
   if (error) {
-    alert("Erro ao atualizar produto: " + error.message);
+    showCustomAlert("Erro", "Erro ao atualizar produto: " + error.message);
   } else {
     logActivity("edicao", updatedProduct.title, "Produto editado no catálogo");
-    alert("Produto atualizado com sucesso!");
+    showCustomAlert("Sucesso", "Produto atualizado com sucesso!");
     closeEditModal();
     renderAdminTable();
   }
