@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vitrine - Brechó Esqueci no Cabide</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <header>
+        <div class="header-main">
+            <h1 class="logo-text">Esqueci no Cabide</h1>
+            <a href="login.html" class="login-link">Login</a>
+        </div>
+        <div class="menu-wrapper">
+            <button class="menu-toggle" aria-label="Menu" title="Menu">
+                &#9776;
+            </button>
+        </div>
+        <ul class="menu-list">
+            <li class="menu-header-item">
+                <img src="https://via.placeholder.com/300x100?text=Logo+Brecho" alt="Logo Brechó" class="menu-logo"/>
+                <span class="menu-name">Brechó Esqueci no Cabide</span>
+            </li>
+            <li><a href="index.html">Início</a></li>
+            <li><a href="sobre.html">Sobre</a></li>
+            <li class="menu-contact-item"><a href="tel:+5521998337465">📞 +55 21 998337465</a></li>
+            <li class="menu-contact-item"><a href="mailto:contato@brecho.com">✉️ contato@brecho.com</a></li>
+            <li class="menu-contact-item"><a href="https://www.instagram.com/brechoesquecinocabide?igsh=bWIxazZhb2tiamUx" target="_blank" rel="noopener">📸 @brechoesquecinocabide</a></li>
+        </ul>
+        <div class="menu-overlay"></div>
+    </header>
+
+    
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Descubra Peças Únicas</h1>
+            <!-- hero background set via CSS -->
+            <p>Moda sustentável com estilo e qualidade.</p>
+        </div>
+    </section>
+
+
+    <main>
+        <div class="category-filter" id="category-filter">
+            <div class="category-card" data-category="Todos">Todos</div>
+            <div class="category-card" data-category="Brechó">Brechó</div>
+            <div class="category-card" data-category="Outlet">Outlet</div>
+        </div>
+
+        <h2>Peças Selecionadas</h2>
+        <div class="container" id="product-list">
+            <!-- Produtos injetados via JS -->
+        </div>
+    </main>
+
+    <!-- MODAL DE DETALHES DO PRODUTO -->
+    <div id="product-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeProductDetails()">&times;</span>
+            <div class="modal-body">
+                <div class="modal-image-container">
+                    <img id="modal-img" src="" alt="Detalhe do Produto">
+                </div>
+                <div class="modal-info">
+                    <h3 id="modal-title"></h3>
+                    <div class="modal-meta">
+                        <span id="modal-origin" class="badge"></span>
+                        <span id="modal-size" class="badge"></span>
+                    </div>
+                    <p id="modal-price" class="card-price" style="font-size: 1.5rem; margin: 15px 0;"></p>
+                    <p id="modal-quantity" style="font-size: 0.85rem; color: #888; margin-bottom: 5px;"></p>
+                    <p id="modal-description" style="color: #555; line-height: 1.6; margin-bottom: 20px;"></p>
+                    <p id="modal-logistics" style="font-size: 0.9rem; color: #777; margin-bottom: 25px;"></p>
+                    <button id="modal-whatsapp-btn" class="btn btn-primary" style="width: 100%; padding: 15px;">Tenho Interesse</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Brechó Esqueci no Cabide - Moda Circular & Sustentável</p>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
+
