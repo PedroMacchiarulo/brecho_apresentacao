@@ -1,18 +1,18 @@
 :root {
     --primary-color: #ffefd5; /* papaya whip - warm pastel */
     --primary-variant: #ffe4b5; /* moccasin */
-    --secondary-color: #a8dadc; /* pastel teal */
+    --secondary-color: #8ca9ad; /* darker pastel teal for better contrast */
     --accent-color: #ff6f61; /* coral accent */
-    --background-color: #f5ecd9; /* slightly toned down background */
-    --surface-color: #ffffff; /* clean white */
+    --background-color: #f5ecd9; 
+    --surface-color: #ffffff; 
     --error-color: #b00020;
-    --on-primary: #5d4037; /* brown text for contrast */
-    --on-secondary: #37474f; /* dark slate */
+    --on-primary: #5d4037; 
+    --on-secondary: #37474f; 
     --on-surface: #37474f;
-    --on-background: #5d4037;
+    --on-background: #4a322a; /* slightly darker brown for better readability */
     --shadow-soft: 0 2px 4px rgba(0,0,0,0.05);
     --shadow-strong: 0 4px 8px rgba(0,0,0,0.1);
-    --gradient-primary: linear-gradient(135deg, #ffefd5 0%, #ffe4b5 100%);
+    --gradient-primary: linear-gradient(135deg, #f5ecd9 0%, #e8dfc8 100%);
 }
 
 /* Global reset */
@@ -20,7 +20,8 @@
 
 body {
     font-family: 'Roboto', sans-serif;
-    background-color: var(--background-color);
+    background: var(--gradient-primary);
+    background-attachment: fixed;
     color: var(--on-background);
     line-height: 1.6;
     overflow-x: hidden;
@@ -235,12 +236,14 @@ header {
 main { padding: 20px 15px; max-width: 1200px; margin: 0 auto; }
 
 h2 {
-    color: var(--secondary-color);
+    color: var(--on-background);
     text-align: center;
     margin-bottom: 25px;
-    font-size: 1.8rem;
+    font-size: 2rem;
     font-weight: 700;
     position: relative;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 h2::after {
