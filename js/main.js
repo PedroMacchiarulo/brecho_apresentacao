@@ -31,11 +31,13 @@ function checkAuth() {
   const user = localStorage.getItem("brecho_auth_user");
   const path = window.location.pathname;
   
+  // REDIRECIONAMENTO SEGURO: Se não estiver logado e tentar acessar admin, VAI para login.
   if (!user && (path.includes("admin") || path.includes("gestao"))) {
     window.location.href = "login.html";
     return;
   }
 
+  // Se estiver logado, apenas ajusta a interface
   if (user) {
     document.body.classList.add("logged-in");
     const indicator = document.getElementById("auth-indicator");

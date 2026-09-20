@@ -430,4 +430,64 @@ footer { text-align: center; padding: 30px; margin-top: 40px; color: #666; font-
 
 @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
 
-@media (max-width: 768px) { .modal-body { flex-direction: column; } }
+/* Design do Cabeçalho do Admin */
+.page-admin header {
+    background: var(--surface-color) !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 1rem 2rem !important;
+    border-bottom: 3px solid var(--secondary-color) !important;
+    box-shadow: var(--shadow-strong) !important;
+    position: relative !important;
+}
+
+.page-admin header .logo {
+    font-family: "Georgia", serif !important;
+    font-size: 1.5rem !important;
+    color: var(--on-surface) !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+}
+
+.page-admin nav {
+    display: flex !important;
+    gap: 15px !important;
+    align-items: center !important;
+}
+
+.page-admin nav a {
+    text-decoration: none !important;
+    color: var(--on-surface) !important;
+    font-weight: 600 !important;
+    padding: 8px 16px !important;
+    border-radius: 8px !important;
+    transition: all 0.3s ease !important;
+    font-size: 0.9rem !important;
+    border: 1px solid transparent !important;
+}
+
+.page-admin nav a:hover {
+    background: var(--primary-color) !important;
+    color: var(--on-primary) !important;
+    border-color: var(--secondary-color) !important;
+}
+
+.page-admin nav a.active {
+    background: var(--secondary-color) !important;
+    color: white !important;
+    border-color: var(--secondary-color) !important;
+}
+
+.page-admin nav a[onclick*="logout"] {
+    background: var(--accent-color) !important;
+    color: white !important;
+    border: none !important;
+    font-weight: 700 !important;
+}
+
+.page-admin nav a[onclick*="logout"]:hover {
+    background: #e05340 !important;
+    transform: translateY(-2px) !important;
+}
+
