@@ -354,10 +354,13 @@ function createCustomDialog(title, message, isInput = false, defaultValue = "") 
   document.body.appendChild(overlay);
 
   return new Promise((resolve) => {
-    document.getElementById("custom-dialog-cancel").onclick = () => {
-      document.body.removeChild(overlay);
-      resolve({ confirmed: false });
-    };
+    const cancelBtn = document.getElementById("custom-dialog-cancel");
+    if (cancelBtn) {
+      cancelBtn.onclick = () => {
+        document.body.removeChild(overlay);
+        resolve({ confirmed: false });
+      };
+    }
     
     document.getElementById("custom-dialog-confirm").onclick = () => {
       const value = isInput ? document.getElementById("custom-dialog-input").value : true;
@@ -367,9 +370,33 @@ function createCustomDialog(title, message, isInput = false, defaultValue = "") 
   });
 }
 
+function showCustomAlert(title, message) {
+  const overlay = document.createElement("div");
+  overlay.className = "custom-dialog-overlay";
+  
+  const dialog = document.createElement("div");
+  dialog.className = "custom-dialog";
+  
+  dialog.innerHTML = `
+    <h3>${title}</h3>
+    <p>${message}</p>
+    <div class="custom-dialog-btns">
+      <button class="custom-dialog-btn btn-confirm" id="custom-alert-ok">Ok</button>
+    </div>
+  `;
+  
+  overlay.appendChild(dialog);
+  document.body.appendChild(overlay);
+
+  document.getElementById("custom-alert-ok").onclick = () => {
+    document.body.removeChild(overlay);
+  };
+}
+
+
 async function toggleStatus(id) {
   if (!supabaseClient) {
-    alert("Banco de dados não conectado.");
+    showCustomAlert("Erro", "Banco de dados não conectado.");
     return;
   }
   const { data: prod } = await supabaseClient
@@ -395,11 +422,11 @@ async function toggleStatus(id) {
         
         const parsedQtd = parseInt(result.value);
         if (isNaN(parsedQtd) || parsedQtd <= 0) {
-          alert("Quantidade inválida.");
+          showCustomAlert("Erro", "Quantidade inválida.");
           return;
         }
         if (parsedQtd > qtd) {
-          alert(`Você só possui ${qtd} unidade(s) em estoque.`);
+          showCustomAlert("Erro", `Você só possui ${qtd} unidade(s) em estoque.`);
           return;
         }
         finalQtdSold = parsedQtd;
@@ -415,22 +442,22 @@ async function toggleStatus(id) {
       updateData.quantity = qtd;
       updateData.status = qtd === 0 ? "Vendido" : "Disponível";
       const { error } = await supabaseClient.from("products").update(updateData).eq("id", id);
-      if (error) { alert("Erro ao registrar venda."); return; }
+      if (error) { showCustomAlert("Erro", "Erro ao registrar venda."); return; }
       
       logActivity("venda", prod.title, `Vendidas ${finalQtdSold} peça(s). Restam ${qtd}`);
       
       if (qtd > 0) {
-        alert(`Venda de ${finalQtdSold} peça(s) registrada! Restam ${qtd} no estoque.`);
+        showCustomAlert("Sucesso", `Venda de ${finalQtdSold} peça(s) registrada! Restam ${qtd} no estoque.`);
       } else {
-        alert(`Venda de ${finalQtdSold} peça(s) registrada! Produto esgotado.`);
+        showCustomAlert("Sucesso", `Venda de ${finalQtdSold} peça(s) registrada! Produto esgotado.`);
       }
     } else {
       updateData.quantity = 1;
       updateData.status = "Disponível";
       const { error } = await supabaseClient.from("products").update(updateData).eq("id", id);
-      if (error) { alert("Erro ao restaurar produto."); return; }
+      if (error) { showCustomAlert("Erro", "Erro ao restaurar produto."); return; }
       logActivity("restauracao", prod.title, "Produto restaurado ao estoque com 1 peça");
-      alert("Produto disponível novamente com 1 peça.");
+      showCustomAlert("Sucesso", "Produto disponível novamente com 1 peça.");
     }
     renderAdminTable();
   }
