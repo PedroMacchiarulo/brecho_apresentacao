@@ -328,6 +328,45 @@ async function renderAdminTable() {
   }
 }
 
+function createCustomDialog(title, message, isInput = false, defaultValue = "") {
+  const overlay = document.createElement("div");
+  overlay.className = "custom-dialog-overlay";
+  
+  const dialog = document.createElement("div");
+  dialog.className = "custom-dialog";
+  
+  let inputHtml = "";
+  if (isInput) {
+    inputHtml = `<input type="number" id="custom-dialog-input" value="${defaultValue}" min="1">`;
+  }
+
+  dialog.innerHTML = `
+    <h3>${title}</h3>
+    <p>${message}</p>
+    ${inputHtml}
+    <div class="custom-dialog-btns">
+      <button class="custom-dialog-btn btn-cancel" id="custom-dialog-cancel">Cancelar</button>
+      <button class="custom-dialog-btn btn-confirm" id="custom-dialog-confirm">Confirmar</button>
+    </div>
+  `;
+  
+  overlay.appendChild(dialog);
+  document.body.appendChild(overlay);
+
+  return new Promise((resolve) => {
+    document.getElementById("custom-dialog-cancel").onclick = () => {
+      document.body.removeChild(overlay);
+      resolve({ confirmed: false });
+    };
+    
+    document.getElementById("custom-dialog-confirm").onclick = () => {
+      const value = isInput ? document.getElementById("custom-dialog-input").value : true;
+      document.body.removeChild(overlay);
+      resolve({ confirmed: true, value: value });
+    };
+  });
+}
+
 async function toggleStatus(id) {
   if (!supabaseClient) {
     alert("Banco de dados não conectado.");
@@ -343,12 +382,18 @@ async function toggleStatus(id) {
     let updateData = { lastModified: new Date().toISOString() };
 
     if (qtd > 0) {
-      // --- LÓGICA DE CONFIRMAÇÃO DE VENDA ---
       let finalQtdSold = 1;
       if (qtd > 1) {
-        const inputQtd = prompt(`A peça "${prod.title}" possui ${qtd} unidade(s). Quantas deseja vender?`, "1");
-        const parsedQtd = parseInt(inputQtd);
+        const result = await createCustomDialog(
+          "Registrar Venda", 
+          `A peça "${prod.title}" possui ${qtd} unidade(s). Quantas deseja vender?`, 
+          true, 
+          "1"
+        );
         
+        if (!result.confirmed) return;
+        
+        const parsedQtd = parseInt(result.value);
         if (isNaN(parsedQtd) || parsedQtd <= 0) {
           alert("Quantidade inválida.");
           return;
@@ -359,10 +404,11 @@ async function toggleStatus(id) {
         }
         finalQtdSold = parsedQtd;
       } else {
-        // Se tiver apenas uma, pede confirmação simples
-        if (!confirm(`Deseja confirmar a venda da última unidade de "${prod.title}"?`)) {
-          return;
-        }
+        const result = await createCustomDialog(
+          "Confirmar Venda", 
+          `Deseja confirmar a venda da última unidade de "${prod.title}"?`
+        );
+        if (!result.confirmed) return;
       }
 
       qtd -= finalQtdSold;

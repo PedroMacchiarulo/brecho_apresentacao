@@ -428,7 +428,89 @@ footer { text-align: center; padding: 30px; margin-top: 40px; color: #666; font-
 
 .close-modal:hover { color: #333; }
 
-@keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+/* Custom Dialog / Popup Styling */
+.custom-dialog-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    animation: fadeIn 0.2s ease;
+}
+
+.custom-dialog {
+    background: var(--surface-color);
+    padding: 30px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: var(--shadow-strong);
+    border: 3px solid var(--secondary-color);
+    animation: slideUp 0.3s ease;
+}
+
+.custom-dialog h3 {
+    color: var(--on-surface);
+    margin-bottom: 15px;
+    font-family: 'Georgia', serif;
+    font-size: 1.4rem;
+}
+
+.custom-dialog p {
+    color: var(--on-background);
+    margin-bottom: 20px;
+    font-size: 1rem;
+}
+
+.custom-dialog input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 2px solid var(--secondary-color);
+    border-radius: 8px;
+    font-family: inherit;
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+.custom-dialog-btns {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.custom-dialog-btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.btn-confirm {
+    background: var(--accent-color);
+    color: white;
+}
+
+.btn-cancel {
+    background: #eee;
+    color: #666;
+}
+
+.custom-dialog-btn:hover {
+    transform: translateY(-2px);
+    filter: brightness(0.9);
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
 
 /* Design do Cabeçalho do Admin */
 .page-admin header {
