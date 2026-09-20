@@ -31,7 +31,6 @@ function checkAuth() {
   const user = localStorage.getItem("brecho_auth_user");
   const path = window.location.pathname;
   
-  // Redireciona para login se tentar acessar admin sem estar logado
   if (!user && (path.includes("admin") || path.includes("gestao"))) {
     window.location.href = "login.html";
     return;
@@ -44,14 +43,11 @@ function checkAuth() {
     
     const loginLink = document.getElementById("login-link");
     if (loginLink) {
-      // Se estiver logado, transforma o botão "Login" em "Painel Admin" na home
       if (path === "/" || path.includes("index.html")) {
-        loginLink.textContent = "Painel Admin";
+        loginLink.textContent = "Login";
         loginLink.href = "admin.html";
         loginLink.style.display = "block";
       } else {
-        // Em outras páginas, pode esconder ou manter conforme a necessidade
-        // Aqui vamos manter visível para facilitar a navegação
         loginLink.style.display = "block";
       }
     }
