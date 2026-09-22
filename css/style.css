@@ -362,7 +362,7 @@ h2::after {
 
 .category-filter { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-bottom: 30px; }
 
-.category-card { background: var(--background-color); border: 1px solid rgba(0,0,0,0.05); border-radius: 0; padding: 12px 20px; cursor: pointer; font-weight: 600; color: var(--on-surface); transition: background-color 0.3s ease, color 0.3s ease; }
+.category-card { background: var(--surface-color); border: 1px solid rgba(0,0,0,0.15); border-radius: 0; padding: 12px 20px; cursor: pointer; font-weight: 600; color: var(--on-surface); transition: background-color 0.3s ease, color 0.3s ease; }
 
 .category-card:hover, .category-card.active { background: var(--primary-variant); color: var(--on-primary); }
 
