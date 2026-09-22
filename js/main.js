@@ -47,7 +47,7 @@ function checkAuth() {
     if (loginLink) {
       if (path === "/" || path.includes("index.html")) {
         loginLink.textContent = "Login";
-        loginLink.href = "admin.html";
+        loginLink.href = "login.html";
         loginLink.style.display = "block";
       } else {
         loginLink.style.display = "block";
