@@ -148,22 +148,54 @@ async function logActivity(actionType, productTitle, description) {
 
 async function updateDashboard() {
   try {
-    const products = await getProducts();
-    const { data: logs } = await supabaseClient.from("activity_log").select("*");
-    
-    if (!products || !logs) return;
+    // 1. Gerenciar visibilidade do filtro personalizado
+    const period = document.getElementById("dash-period")?.value;
+    const customRangeDiv = document.getElementById("custom-date-range");
+    if (customRangeDiv) {
+      customRangeDiv.style.display = period === "custom" ? "flex" : "none";
+    }
 
-    // 1. Total de Modelos
-    const totalModels = products.length;
+    const products = await getProducts();
     
-    // 2. Peças em Estoque (Soma de todas as quantidades)
+    // 2. Calcular intervalo de datas para faturamento e vendas
+    let startDate = null;
+    let endDate = new Date().toISOString();
+
+    if (period === "day") {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      startDate = today.toISOString();
+    } else if (period === "week") {
+      const lastWeek = new Date();
+      lastWeek.setDate(lastWeek.getDate() - 7);
+      startDate = lastWeek.toISOString();
+    } else if (period === "month") {
+      const lastMonth = new Date();
+      lastMonth.setMonth(lastMonth.getMonth() - 1);
+      startDate = lastMonth.toISOString();
+    } else if (period === "custom") {
+      const start = document.getElementById("dash-start-date")?.value;
+      const end = document.getElementById("dash-end-date")?.value;
+      if (start) startDate = new Date(start).toISOString();
+      if (end) endDate = new Date(end + "T23:59:59").toISOString();
+    }
+
+    // 3. Buscar logs de atividade filtrados por data
+    let query = supabaseClient.from("activity_log").select("*");
+    if (startDate) query = query.gte("created_at", startDate);
+    if (endDate) query = query.lte("created_at", endDate);
+    
+    const { data: logs } = await query;
+    
+    if (!products) return;
+
+    // 4. Cálculos do Dashboard
+    const totalModels = products.length;
     const totalStock = products.reduce((sum, p) => sum + (p.quantity || 0), 0);
     
-    // 3. Total de Vendas (Quantidade de registros de venda no log)
-    const salesLogs = logs.filter(l => l.action_type === "venda");
+    const salesLogs = logs ? logs.filter(l => l.action_type === "venda") : [];
     const totalSales = salesLogs.length;
     
-    // 4. Faturamento Total (Soma do preço dos produtos vendidos)
     let revenue = 0;
     salesLogs.forEach(log => {
       const product = products.find(p => p.title === log.product_title);
@@ -172,7 +204,7 @@ async function updateDashboard() {
       }
     });
 
-    // Atualiza a interface
+    // 5. Atualiza a interface
     document.getElementById("dash-revenue").innerText = `R$ ${revenue.toFixed(2)}`;
     document.getElementById("dash-sales").innerText = totalSales;
     document.getElementById("dash-stock").innerText = totalStock;

@@ -555,6 +555,44 @@ footer { text-align: center; padding: 30px; margin-top: 40px; color: #666; font-
 }
 
 /* Dashboard Styles */
+.dash-filters {
+    background: var(--surface-color);
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 25px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+    box-shadow: var(--shadow-soft);
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.filter-group label {
+    font-weight: 600;
+    color: var(--on-surface);
+    font-size: 0.9rem;
+}
+
+.filter-group select, .dash-filters input[type="date"] {
+    padding: 8px 12px;
+    border: 2px solid var(--secondary-color);
+    border-radius: 8px;
+    font-family: inherit;
+    background: white;
+    cursor: pointer;
+}
+
+#custom-date-range {
+    display: flex;
+}
+
 .dashboard-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
