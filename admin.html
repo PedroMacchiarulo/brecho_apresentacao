@@ -30,9 +30,44 @@
         <h2 id="admin-title">Gestão de Estoque</h2>
 
         <div class="admin-nav">
-            <button class="tab-btn active" onclick="openTab(event, 'tab-estoque')">📦 Estoque</button>
+            <button class="tab-btn active" onclick="openTab(event, 'tab-dashboard')">📊 Dashboard</button>
+            <button class="tab-btn" onclick="openTab(event, 'tab-estoque')">📦 Estoque</button>
             <button class="tab-btn" onclick="openTab(event, 'tab-cadastro')">➕ Novo Produto</button>
-            <button class="tab-btn" onclick="openTab(event, 'tab-relatorio')">📊 Relatório</button>
+            <button class="tab-btn" onclick="openTab(event, 'tab-relatorio')">📑 Relatório</button>
+        </div>
+
+        <!-- ABA: DASHBOARD -->
+        <div id="tab-dashboard" class="tab-content active">
+            <div class="dashboard-grid">
+                <div class="dash-card">
+                    <div class="dash-icon revenue">💰</div>
+                    <div class="dash-info">
+                        <span class="dash-label">Faturamento Total</span>
+                        <h3 id="dash-revenue">R$ 0,00</h3>
+                    </div>
+                </div>
+                <div class="dash-card">
+                    <div class="dash-icon sales">📈</div>
+                    <div class="dash-info">
+                        <span class="dash-label">Total de Vendas</span>
+                        <h3 id="dash-sales">0</h3>
+                    </div>
+                </div>
+                <div class="dash-card">
+                    <div class="dash-icon stock">📦</div>
+                    <div class="dash-info">
+                        <span class="dash-label">Peças em Estoque</span>
+                        <h3 id="dash-stock">0</h3>
+                    </div>
+                </div>
+                <div class="dash-card">
+                    <div class="dash-icon items">👗</div>
+                    <div class="dash-info">
+                        <span class="dash-label">Total de Modelos</span>
+                        <h3 id="dash-models">0</h3>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- ABA: ESTOQUE -->

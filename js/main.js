@@ -146,7 +146,42 @@ async function logActivity(actionType, productTitle, description) {
   }
 }
 
-// --- LÓGICA DA VITRINE (USER) ---
+async function updateDashboard() {
+  try {
+    const products = await getProducts();
+    const { data: logs } = await supabaseClient.from("activity_log").select("*");
+    
+    if (!products || !logs) return;
+
+    // 1. Total de Modelos
+    const totalModels = products.length;
+    
+    // 2. Peças em Estoque (Soma de todas as quantidades)
+    const totalStock = products.reduce((sum, p) => sum + (p.quantity || 0), 0);
+    
+    // 3. Total de Vendas (Quantidade de registros de venda no log)
+    const salesLogs = logs.filter(l => l.action_type === "venda");
+    const totalSales = salesLogs.length;
+    
+    // 4. Faturamento Total (Soma do preço dos produtos vendidos)
+    let revenue = 0;
+    salesLogs.forEach(log => {
+      const product = products.find(p => p.title === log.product_title);
+      if (product) {
+        revenue += parseFloat(product.price || 0);
+      }
+    });
+
+    // Atualiza a interface
+    document.getElementById("dash-revenue").innerText = `R$ ${revenue.toFixed(2)}`;
+    document.getElementById("dash-sales").innerText = totalSales;
+    document.getElementById("dash-stock").innerText = totalStock;
+    document.getElementById("dash-models").innerText = totalModels;
+
+  } catch (e) {
+    console.error("Erro ao atualizar dashboard:", e);
+  }
+}
 async function renderUserVitrine(filterCategory = 'Todos') {
   const listContainer = document.getElementById("product-list");
   if (!listContainer) return;
@@ -294,8 +329,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // ... outras inicializações
 });
 async function renderAdminTable() {
+  updateDashboard();
   const tableBody = document.getElementById("admin-product-list");
   if (!tableBody) return;
+
 
   try {
     const products = await getProducts();
@@ -730,6 +767,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderUserVitrine();
   renderAdminTable();
   handleAdminForm();
+  updateDashboard();
 
   // 5. Configuração do Menu Hamburger
   const menuToggle = document.querySelector('.menu-toggle');
@@ -750,6 +788,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     if (menuOverlay) {
+      // Fix: Change event listener to correct one
       menuOverlay.addEventListener('click', closeMenu);
     }
   }

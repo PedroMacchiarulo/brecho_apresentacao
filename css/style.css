@@ -554,7 +554,65 @@ footer { text-align: center; padding: 30px; margin-top: 40px; color: #666; font-
     to { transform: translateY(0); opacity: 1; }
 }
 
-/* Design do Cabeçalho do Admin */
+/* Dashboard Styles */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.dash-card {
+    background: var(--surface-color);
+    padding: 25px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: var(--shadow-soft);
+    border: 1px solid rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.dash-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-strong);
+}
+
+.dash-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.8rem;
+}
+
+.dash-icon.revenue { background: #e3f2fd; color: #1976d2; }
+.dash-icon.sales { background: #f1f8e9; color: #388e3c; }
+.dash-icon.stock { background: #fff3e0; color: #f57c00; }
+.dash-icon.items { background: #f3e5f5; color: #7b1fa2; }
+
+.dash-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.dash-label {
+    font-size: 0.9rem;
+    color: #888;
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.dash-info h3 {
+    font-size: 1.6rem;
+    color: var(--on-surface);
+    margin: 0;
+    font-weight: 700;
+}
+
 .page-admin header {
     background: var(--surface-color) !important;
     display: flex !important;
