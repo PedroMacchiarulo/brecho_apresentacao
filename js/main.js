@@ -153,18 +153,22 @@ async function renderUserVitrine(filterCategory = 'Todos') {
 
   try {
     const products = await getProducts();
+    if (!products) return;
+    
     listContainer.innerHTML = "";
 
-    if (!products || products.length === 0) {
+    if (products.length === 0) {
       listContainer.innerHTML =
         '<p style="text-align:center; width:100%;">Nenhum produto encontrado no momento.</p>';
       return;
     }
 
-    // Filtragem de produtos
-    const filteredProducts = (filterCategory && filterCategory !== 'Todos') 
-      ? products.filter(p => p.origin === filterCategory) 
-      : products;
+    // Filtragem Robusta: Compara ignorando maiúsculas/minúsculas e espaços extras
+    const filteredProducts = products.filter(p => {
+      if (!filterCategory || filterCategory === 'Todos') return true;
+      if (!p.origin) return false;
+      return p.origin.trim().toLowerCase() === filterCategory.trim().toLowerCase();
+    });
 
     if (filteredProducts.length === 0) {
       listContainer.innerHTML = '<p style="text-align:center; width:100%;">Nenhuma peça encontrada nesta categoria.</p>';
@@ -711,38 +715,42 @@ function openTab(evt, tabName) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  // 1. Login e Auth PRIMEIRO (Sempre funcionam, independente do banco)
+  // 1. Inicializações de Interface e Eventos
+  initMenu();
+  initCategoryFilter();
+
+  // 2. Login e Autenticação
   handleLogin();
   checkAuth();
 
-  // 2. Inicializa banco de dados
+  // 3. Inicializa conexão com o Banco de Dados
   initSupabase();
 
-  // 3. Renderiza interfaces (só funcionam se o banco conectar)
+  // 4. Renderização de Conteúdo
   renderUserVitrine();
   renderAdminTable();
   handleAdminForm();
 
-  // Hamburger menu toggle
+  // 5. Configuração do Menu Hamburger
   const menuToggle = document.querySelector('.menu-toggle');
   const menuList = document.querySelector('.menu-list');
   if (menuToggle && menuList) {
-  const menuOverlay = document.querySelector('.menu-overlay');
+    const menuOverlay = document.querySelector('.menu-overlay');
 
-  const closeMenu = () => {
-    menuList.classList.remove('show');
-    menuToggle.setAttribute('aria-expanded', 'false');
-    if (menuOverlay) menuOverlay.classList.remove('active');
-  };
+    const closeMenu = () => {
+      menuList.classList.remove('show');
+      menuToggle.setAttribute('aria-expanded', 'false');
+      if (menuOverlay) menuOverlay.classList.remove('active');
+    };
 
-  menuToggle.addEventListener('click', () => {
-    const isOpen = menuList.classList.toggle('show');
-    menuToggle.setAttribute('aria-expanded', isOpen.toString());
-    if (menuOverlay) menuOverlay.classList.toggle('active', isOpen);
-  });
+    menuToggle.addEventListener('click', () => {
+      const isOpen = menuList.classList.toggle('show');
+      menuToggle.setAttribute('aria-expanded', isOpen.toString());
+      if (menuOverlay) menuOverlay.classList.toggle('active', isOpen);
+    });
 
-  if (menuOverlay) {
-    menuOverlay.addEventListener('click', closeMenu);
+    if (menuOverlay) {
+      menuOverlay.addEventListener('click', closeMenu);
+    }
   }
-}
 });
