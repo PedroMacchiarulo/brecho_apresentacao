@@ -12,17 +12,20 @@ function handleLogin() {
   if (!form) return;
 
   console.log("Ativando formulário de login...");
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const user = document.getElementById("username").value;
     const pass = document.getElementById("password").value;
 
     if (user === "admin" && pass === "admin") {
-      localStorage.setItem("brecho_auth_user", "admin");
-      alert("Bem-vindo, Gestor!");
-      window.location.href = "admin.html";
+      showCustomAlert("Sucesso", "Bem-vindo, Gestor!");
+      // Pequeno delay para o usuário ler o alerta antes de mudar de página
+      setTimeout(() => {
+        localStorage.setItem("brecho_auth_user", "admin");
+        window.location.href = "admin.html";
+      }, 1500);
     } else {
-      alert("Usuário ou senha incorretos!");
+      showCustomAlert("Erro", "Usuário ou senha incorretos!");
     }
   });
 }
@@ -31,13 +34,11 @@ function checkAuth() {
   const user = localStorage.getItem("brecho_auth_user");
   const path = window.location.pathname;
   
-  // REDIRECIONAMENTO SEGURO: Se não estiver logado e tentar acessar admin, VAI para login.
   if (!user && (path.includes("admin") || path.includes("gestao"))) {
     window.location.href = "login.html";
     return;
   }
 
-  // Se estiver logado, apenas ajusta a interface
   if (user) {
     document.body.classList.add("logged-in");
     const indicator = document.getElementById("auth-indicator");
@@ -47,7 +48,8 @@ function checkAuth() {
     if (loginLink) {
       if (path === "/" || path.includes("index.html")) {
         loginLink.textContent = "Login";
-        loginLink.href = "login.html";
+        // Se já está logado, vai direto para o admin para evitar a tela de login
+        loginLink.href = "admin.html"; 
         loginLink.style.display = "block";
       } else {
         loginLink.style.display = "block";
@@ -56,8 +58,9 @@ function checkAuth() {
   }
 }
 
-function logout() {
-  if (!confirm("Tem certeza que deseja sair?")) return;
+async function logout() {
+  const result = await createCustomDialog("Sair", "Tem certeza que deseja sair da sua conta?");
+  if (!result.confirmed) return;
   localStorage.removeItem("brecho_auth_user");
   window.location.href = "index.html";
 }
@@ -102,9 +105,9 @@ async function uploadImage(file) {
       .getPublicUrl(fileName);
 
     return publicUrl;
-  } catch (error) {
+    } catch (error) {
     console.error("Erro ao enviar imagem:", error);
-    alert("Erro ao enviar imagem para a nuvem.");
+    showCustomAlert("Erro", "Erro ao enviar imagem para a nuvem.");
     return null;
   }
 }
@@ -465,22 +468,27 @@ async function toggleStatus(id) {
 
 async function deleteProduct(id) {
   if (!supabaseClient) {
-    alert("Banco de dados não conectado.");
+    showCustomAlert("Erro", "Banco de dados não conectado.");
     return;
   }
-  if (confirm("Deseja realmente excluir este produto?")) {
-    const { data: prod } = await supabaseClient
-      .from("products")
-      .select("title")
-      .eq("id", id)
-      .single();
-    const title = prod?.title || "Desconhecido";
-    const { error } = await supabaseClient
-      .from("products")
-      .delete()
-      .eq("id", id);
-    if (error) alert("Erro ao excluir produto");
-    else logActivity("exclusao", title, "Produto removido do catálogo");
+  const result = await createCustomDialog("Excluir Produto", "Deseja realmente excluir este produto do catálogo?");
+  if (!result.confirmed) return;
+  
+  const { data: prod } = await supabaseClient
+    .from("products")
+    .select("title")
+    .eq("id", id)
+    .single();
+  const title = prod?.title || "Desconhecido";
+  const { error } = await supabaseClient
+    .from("products")
+    .delete()
+    .eq("id", id);
+  if (error) {
+    showCustomAlert("Erro", "Erro ao excluir produto");
+  } else {
+    logActivity("exclusao", title, "Produto removido do catálogo");
+    showCustomAlert("Sucesso", "Produto excluído com sucesso!");
     renderAdminTable();
   }
 }
@@ -492,7 +500,7 @@ function handleAdminForm() {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     if (!supabaseClient) {
-      alert("Erro: Banco de dados não conectado.");
+      showCustomAlert("Erro", "Erro: Banco de dados não conectado.");
       return;
     }
 
@@ -500,11 +508,12 @@ function handleAdminForm() {
     const fileInput = document.getElementById("image-file");
     const file = fileInput.files[0];
     if (!file) {
-      alert("Selecione uma foto para o produto.");
+      showCustomAlert("Atenção", "Selecione uma foto para o produto.");
       return;
     }
     const imageUrl = await uploadImage(file);
     if (!imageUrl) return;
+
 
     const newProduct = {
       title: document.getElementById("title").value,
@@ -536,7 +545,7 @@ function handleAdminForm() {
 
 async function generateReport() {
   if (!supabaseClient) {
-    alert("Banco de dados não conectado.");
+    showCustomAlert("Erro", "Banco de dados não conectado.");
     return;
   }
 
