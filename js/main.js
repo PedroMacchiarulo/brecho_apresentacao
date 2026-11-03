@@ -787,41 +787,17 @@ document.addEventListener("DOMContentLoaded", () => {
   // 1. Inicializações de Interface e Eventos
   initMenu();
   initCategoryFilter();
-
+  
   // 2. Login e Autenticação
   handleLogin();
   checkAuth();
-
+  
   // 3. Inicializa conexão com o Banco de Dados
   initSupabase();
-
+  
   // 4. Renderização de Conteúdo
   renderUserVitrine();
   renderAdminTable();
   handleAdminForm();
   updateDashboard();
-
-  // 5. Configuração do Menu Hamburger
-  const menuToggle = document.querySelector('.menu-toggle');
-  const menuList = document.querySelector('.menu-list');
-  if (menuToggle && menuList) {
-    const menuOverlay = document.querySelector('.menu-overlay');
-
-    const closeMenu = () => {
-      menuList.classList.remove('show');
-      menuToggle.setAttribute('aria-expanded', 'false');
-      if (menuOverlay) menuOverlay.classList.remove('active');
-    };
-
-    menuToggle.addEventListener('click', () => {
-      const isOpen = menuList.classList.toggle('show');
-      menuToggle.setAttribute('aria-expanded', isOpen.toString());
-      if (menuOverlay) menuOverlay.classList.toggle('active', isOpen);
-    });
-
-    if (menuOverlay) {
-      // Fix: Change event listener to correct one
-      menuOverlay.addEventListener('click', closeMenu);
-    }
-  }
 });
