@@ -163,8 +163,11 @@ header {
 }
 .menu-overlay.active {
   display: block;
-}  z-index: 200;
-  text-align: left; /* ensure left alignment */
+}
+
+.menu-list {
+  z-index: 200;
+  text-align: left;
   padding-left: 0;
   list-style: none;
 }

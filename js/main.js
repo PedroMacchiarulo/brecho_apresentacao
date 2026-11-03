@@ -356,10 +356,8 @@ function initMenu() {
 }
 
 // Adicionar ao DOMContentLoaded
-document.addEventListener("DOMContentLoaded", () => {
-  initMenu();
-  // ... outras inicializações
-});
+// (Removed the placeholder listener from here)
+
 async function renderAdminTable() {
   updateDashboard();
   const tableBody = document.getElementById("admin-product-list");
