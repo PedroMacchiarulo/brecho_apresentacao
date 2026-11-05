@@ -313,7 +313,7 @@ function closeProductDetails() {
 }
 
 function sendWhatsApp(title) {
-  const phone = "5511999999999";
+  const phone = "5521998337465";
   const msg = encodeURIComponent(
     `Olá! Gostaria de saber mais sobre a peça "${title}" que vi no site do Esqueci no Cabide!`,
   );
